@@ -3,6 +3,9 @@ using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Media.Imaging;
+using Size = Avalonia.Size;
+using System.Numerics;
 
 namespace slime;
 
@@ -32,12 +35,20 @@ public class PixelBuffer(int height = 1000, int width = 1000) : IDisposable
 
     public void TestPattern()
     {
+        var fHeight = (float)Height;
         Parallel.For( 0, Height, (int y) =>
         {
-            for (int x = 0; x < Width; x++)
-            {
-                this[x, y] = new Bgra((byte)x, (byte)y, 0, 255);
-            }
+            byte r = (byte)(y * 255 / Height);
+            for (int x = 0; x < Width; x++) { this[x, y] = new Bgra((byte)x, (byte)y, r, 255); }
         });
+    }
+
+    public void CopyTo(WriteableBitmap wb)
+    {
+        using var fb = wb.Lock();
+        for (int y = 0; y < Height; y++)
+        {
+            Marshal.Copy(buffer, y * Width * 4, fb.Address + y * fb.RowBytes, Width * 4);
+        }
     }
 }

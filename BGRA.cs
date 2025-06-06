@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 
 namespace slime;
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct Bgra
 {
     public readonly byte B; public readonly byte G;

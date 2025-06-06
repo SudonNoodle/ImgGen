@@ -28,19 +28,8 @@ public partial class MainWindow : Window
         Image.Width = Math.Clamp(source.Size.Width, 0, ClientSize.Width);
         Image.Height = Math.Clamp(source.Size.Height, 0, ClientSize.Height);
         Image.Source = wb;
-        using var frame = wb.Lock();
-        for (int y = 0; y < source.Size.Height; y++)
-        {
-            Marshal.Copy(source.Image.ToArray(),
-                y * source.PixelSize.Width * 4,
-                frame.Address + y * frame.RowBytes,
-                source.PixelSize.Width * 4);
-        }
-        
-        // Bitmap source = new Bitmap("/home/bo/Projects/slime/ffxiv_05192025_151441_926.png");
-
-        // Image.Source = source;
-
+        source.TestPattern();
+        source.CopyTo(wb);
         
         this.GetObservable(ClientSizeProperty).Subscribe( new AnonymousObserver<Size>(sz =>
         {
