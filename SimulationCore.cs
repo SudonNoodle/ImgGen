@@ -9,7 +9,7 @@ using Avalonia.Threading;
 
 namespace slime;
 
-public class SimulationCore(WriteableBitmap output, PixelSize size, double frameRate = 60.0)
+public class SimulationCore(Image img, WriteableBitmap output, PixelSize size, double frameRate = 100.0)
 {
     private readonly CancellationTokenSource cts = new();
     private Task? task;
@@ -19,7 +19,7 @@ public class SimulationCore(WriteableBitmap output, PixelSize size, double frame
     
     public void StartRenderLoop()
     {
-        task = Task.Run(() => RenderLoopAsync(output));
+        task = Task.Run(RenderLoopAsync);
     }
 
     public void StopRenderLoop()
@@ -28,20 +28,23 @@ public class SimulationCore(WriteableBitmap output, PixelSize size, double frame
         task?.Wait();
     }
 
-    private async Task RenderLoopAsync(WriteableBitmap target)
+    private async Task RenderLoopAsync()
     {
         uint frameCounter = 0;
         while (!cts.IsCancellationRequested)
         {
             frameTimer.Restart();
             await Task.Run(() => GenerateFrame(frameCounter));
-            await Dispatcher.UIThread.InvokeAsync(() => current.CopyTo(output), DispatcherPriority.Render);
-            current.CopyTo(target);
-            if (frameTimer.Elapsed.TotalMilliseconds <= 1000f / frameRate)
-            { await Task.Delay((int)(1000 / frameRate - frameTimer.Elapsed.TotalMilliseconds)); }
-            //(current,  previous) = (previous, current);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                previous.CopyTo(output);
+                img.InvalidateVisual();
+            }, DispatcherPriority.Render);
+            //if (frameTimer.Elapsed.TotalMilliseconds <= 1000f / frameRate)
+            //{ await Task.Delay((int)(1000 / frameRate - frameTimer.Elapsed.TotalMilliseconds)); }
+            (current,  previous) = (previous, current);
             frameCounter++;
-            Debug.WriteLine(frameCounter.ToString());
+            Debug.WriteLine(frameCounter.ToString(), ": ", frameTimer.ElapsedMilliseconds.ToString());
         }
     }
 
@@ -51,7 +54,7 @@ public class SimulationCore(WriteableBitmap output, PixelSize size, double frame
         Parallel.For( 0, size.Height, (int y) =>
         {
             byte r = (byte)(y * 255 / size.Height);
-            for (int x = 0; x < size.Width; x++) { current[x, y] = new Bgra((byte)(frameCounter), (byte)y, r, 255); }
+            for (int x = 0; x < size.Width; x++) { current[x, y] = new Bgra((byte)x, (byte)y, (byte)frameCounter, 255); }
         });
     }
 }

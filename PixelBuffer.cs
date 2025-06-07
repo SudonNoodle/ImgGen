@@ -38,10 +38,11 @@ public class PixelBuffer(PixelSize size) : IDisposable
 
     public void CopyTo(WriteableBitmap wb)
     {
-        using var fb = wb.Lock();
+        var fb = wb.Lock();
         for (int y = 0; y < height; y++)
         {
             Marshal.Copy(buffer, y * width * 4, fb.Address + y * fb.RowBytes, width * 4);
         }
+        fb.Dispose();
     }
 }

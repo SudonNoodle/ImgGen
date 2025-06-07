@@ -29,7 +29,7 @@ public partial class MainWindow : Window
             PixelFormat.Bgra8888,
             AlphaFormat.Premul);
 
-        SimCore = new SimulationCore(wb, wb.PixelSize);
+        SimCore = new SimulationCore(Image, wb, wb.PixelSize);
         Image.Width = Math.Clamp(size.Width, 0, ClientSize.Width);
         Image.Height = Math.Clamp(size.Height, 0, ClientSize.Height);
         Image.Source = wb;
