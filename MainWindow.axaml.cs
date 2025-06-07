@@ -10,6 +10,7 @@ namespace slime;
 
 public partial class MainWindow : Window
 {
+    private readonly PixelBuffer source = new();
     public MainWindow()
     {
         InitializeComponent();
@@ -18,7 +19,6 @@ public partial class MainWindow : Window
 
     private void OnOpened(object? sender, EventArgs e)
     {
-        var source = new PixelBuffer();
         source.TestPattern();
         var wb = new WriteableBitmap(
             source.PixelSize,
@@ -30,7 +30,7 @@ public partial class MainWindow : Window
         Image.Source = wb;
         source.TestPattern();
         source.CopyTo(wb);
-        
+        //wb.Save("/tmp/image.png");
         this.GetObservable(ClientSizeProperty).Subscribe( new AnonymousObserver<Size>(sz =>
         {
             Image.Width = Math.Clamp(source.Size.Width, 0, sz.Width);

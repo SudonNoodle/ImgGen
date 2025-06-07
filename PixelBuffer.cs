@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Size = Avalonia.Size;
-using System.Numerics;
 
 namespace slime;
 
