@@ -34,18 +34,18 @@ public class SimulationCore(WriteableBitmap output, PixelSize size, double frame
         while (!cts.IsCancellationRequested)
         {
             frameTimer.Restart();
-            GenerateFrame(frameCounter);
-            //await Dispatcher.UIThread.InvokeAsync(() => current.CopyTo(output));
+            await Task.Run(() => GenerateFrame(frameCounter));
+            await Dispatcher.UIThread.InvokeAsync(() => current.CopyTo(output), DispatcherPriority.Render);
             current.CopyTo(target);
             if (frameTimer.Elapsed.TotalMilliseconds <= 1000f / frameRate)
             { await Task.Delay((int)(1000 / frameRate - frameTimer.Elapsed.TotalMilliseconds)); }
-            (current,  previous) = (previous, current);
+            //(current,  previous) = (previous, current);
             frameCounter++;
             Debug.WriteLine(frameCounter.ToString());
         }
     }
 
-    void GenerateFrame(uint frameCounter)
+    private void GenerateFrame(uint frameCounter)
     {
         var fHeight = size.Height;
         Parallel.For( 0, size.Height, (int y) =>
